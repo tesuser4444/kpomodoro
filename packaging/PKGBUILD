@@ -1,0 +1,20 @@
+# Maintainer: matrix <motorocool@gmail.com>
+pkgname=kpomodoro
+pkgver=${PKGVER:-0.0.0}
+pkgrel=1
+pkgdesc='Temporizador Pomodoro nativo para KDE Plasma'
+arch=(x86_64)
+url='https://github.com/tesuser4444/kpomodoro'
+license=(GPL-3.0-or-later)
+depends=(qt6-base qt6-declarative kirigami qqc2-desktop-style knotifications kstatusnotifieritem)
+makedepends=(cmake ninja extra-cmake-modules)
+
+build() {
+    cmake -S "$startdir/.." -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

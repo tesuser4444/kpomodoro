@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Instalar dependencias
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git cmake ninja extra-cmake-modules \
+            qt6-base qt6-declarative kirigami qqc2-desktop-style knotifications kstatusnotifieritem
+
+      - uses: actions/checkout@v4
+
+      - name: Configurar
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+
+      - name: Compilar
+        run: cmake --build build
+
+      - name: Prueba de arranque
+        run: |
+          rc=0
+          QT_QPA_PLATFORM=offscreen timeout 5 ./build/kpomodoro || rc=$?
+          # 124 = sigue ejecutándose tras 5 s (correcto); cualquier otro código es un fallo
+          [ "$rc" -eq 124 ]
+
+      - name: Empaquetar (DESTDIR)
+        run: |
+          DESTDIR="$PWD/stage" cmake --install build
+          tar -C stage -czf kpomodoro-ci-${GITHUB_SHA::8}-linux-x86_64.tar.gz .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kpomodoro-ci-${{ github.sha }}
+          path: kpomodoro-ci-*.tar.gz
+          retention-days: 14

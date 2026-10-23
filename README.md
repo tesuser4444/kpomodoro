@@ -22,3 +22,15 @@ Para instalar en todo el sistema usa `-DCMAKE_INSTALL_PREFIX=/usr` y `sudo cmake
 ## Licencia
 
 GPL-3.0-or-later. Consulta el archivo `LICENSE`.
+
+## Versionado y releases
+
+Se sigue [SemVer](https://semver.org/lang/es/). La versión vive en `CMakeLists.txt`.
+
+    scripts/release.sh 1.1.0
+    git push origin main v1.1.0
+
+El tag `v*` dispara el workflow *Release*, que compila y publica un tarball
+(`.tar.gz`), un paquete Arch (`.pkg.tar.zst`) y `SHA256SUMS` en GitHub Releases.
+Un tag con sufijo (`v1.2.0-rc.1`) se publica como pre-release. El workflow *CI*
+compila cada push/PR y sube el binario como artifact.

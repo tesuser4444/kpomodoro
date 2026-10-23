@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Instalar dependencias
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git cmake ninja extra-cmake-modules \
+            qt6-base qt6-declarative kirigami qqc2-desktop-style knotifications kstatusnotifieritem
+
+      - uses: actions/checkout@v4
+
+      - name: Validar versión semver
+        id: v
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          echo "$tag" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' \
+            || { echo "::error::El tag '$GITHUB_REF_NAME' no es semver"; exit 1; }
+          cmake_ver=$(sed -n 's/^project(kpomodoro VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          [ "${tag%%-*}" = "$cmake_ver" ] \
+            || { echo "::error::El tag ($tag) no coincide con CMakeLists.txt ($cmake_ver). Usa scripts/release.sh"; exit 1; }
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Compilar
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build
+
+      - name: Tarball binario
+        run: |
+          DESTDIR="$PWD/stage" cmake --install build
+          tar -C stage -czf kpomodoro-${{ steps.v.outputs.version }}-linux-x86_64.tar.gz .
+
+      - name: Paquete Arch (.pkg.tar.zst)
+        run: |
+          useradd -m builder
+          chown -R builder:builder .
+          su builder -c "cd packaging && PKGVER=$(echo '${{ steps.v.outputs.version }}' | tr - _) makepkg -f --nodeps --noconfirm"
+          cp packaging/*.pkg.tar.zst .
+
+      - name: Checksums
+        run: sha256sum kpomodoro-* > SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kpomodoro-${{ steps.v.outputs.version }}
+          path: |
+            kpomodoro-*
+            SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            kpomodoro-*.tar.gz
+            kpomodoro-*.pkg.tar.zst
+            SHA256SUMS
+          generate_release_notes: true
+          prerelease: ${{ contains(steps.v.outputs.version, '-') }}

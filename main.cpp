@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setOrganizationName(QStringLiteral("kpomodoro"));
     app.setApplicationName(QStringLiteral("kpomodoro"));
+    app.setApplicationVersion(QStringLiteral(KPOMODORO_VERSION));
     app.setDesktopFileName(QStringLiteral("kpomodoro"));
     app.setQuitOnLastWindowClosed(false);
 

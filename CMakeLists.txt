@@ -23,6 +23,8 @@ qt_add_qml_module(kpomodoro
     QML_FILES qml/Main.qml
 )
 
+target_compile_definitions(kpomodoro PRIVATE KPOMODORO_VERSION="${PROJECT_VERSION}")
+
 target_link_libraries(kpomodoro PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::QuickControls2
     KF6::Notifications KF6::StatusNotifierItem
