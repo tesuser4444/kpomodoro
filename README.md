@@ -18,3 +18,7 @@ Temporizador Pomodoro nativo para KDE Plasma (C++ / Qt 6 / Kirigami / KDE Framew
     cmake --install build
 
 Para instalar en todo el sistema usa `-DCMAKE_INSTALL_PREFIX=/usr` y `sudo cmake --install build`.
+
+## Licencia
+
+GPL-3.0-or-later. Consulta el archivo `LICENSE`.
