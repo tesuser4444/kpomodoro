@@ -1,0 +1,10 @@
+[Global]
+IconName=chronometer
+Name=Pomodoro
+Comment=Temporizador Pomodoro
+
+[Event/phaseFinished]
+Name=Fase terminada
+Comment=Una sesión de enfoque o descanso ha terminado
+Action=Popup|Sound
+Sound=message-new-instant

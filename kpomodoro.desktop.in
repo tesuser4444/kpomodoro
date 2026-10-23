@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Pomodoro
+GenericName=Temporizador Pomodoro
+Comment=Temporizador de productividad con la técnica Pomodoro
+Exec=@KDE_INSTALL_FULL_BINDIR@/kpomodoro
+Icon=chronometer
+Categories=Qt;KDE;Utility;
+StartupNotify=true
