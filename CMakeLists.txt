@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(kpomodoro VERSION 1.0.0 LANGUAGES CXX)
 
+include(CTest)
+
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
@@ -29,6 +31,18 @@ target_link_libraries(kpomodoro PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::QuickControls2
     KF6::Notifications KF6::StatusNotifierItem
 )
+
+if(BUILD_TESTING)
+    find_package(Qt6 REQUIRED COMPONENTS Test)
+
+    qt_add_executable(test_pomodoro
+        tests/pomodoro_test.cpp
+        pomodoro.cpp
+        pomodoro.h
+    )
+    target_link_libraries(test_pomodoro PRIVATE Qt6::Core Qt6::Test)
+    add_test(NAME pomodoro COMMAND test_pomodoro)
+endif()
 
 install(TARGETS kpomodoro ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 configure_file(kpomodoro.desktop.in ${CMAKE_BINARY_DIR}/kpomodoro.desktop @ONLY)
